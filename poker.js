@@ -248,13 +248,52 @@ function setupButtonListeners() {
         }
     });
     
-    // Next Round button
+    // Next round and New Game buttons container
+    const roundButtonsContainer = document.querySelector('.round-buttons');
+    
+    // Next round button
     const nextRoundBtn = document.getElementById('next-round-btn');
     if (nextRoundBtn) {
         console.log('Found Next Round button, adding event listener');
         nextRoundBtn.onclick = startNewRound;
     } else {
         console.error('Next Round button not found!');
+    }
+    
+    // New Game button
+    const newGameBtn = document.getElementById('new-game-btn');
+    if (newGameBtn) {
+        console.log('Found New Game button, adding event listener');
+        newGameBtn.onclick = function() {
+            // Reset game state completely
+            gameState.playerChips = 1000;
+            gameState.computerChips = 1000;
+            gameState.pot = 0;
+            gameState.communityCards = [];
+            gameState.currentBet = 0;
+            gameState.currentRoundBets = { player: 0, computer: 0 };
+            gameState.gamePhase = 'preflop';
+            gameState.playerFolded = false;
+            gameState.computerFolded = false;
+            gameState.currentPlayer = 'player';
+            
+            // Update UI
+            updateChipsDisplay();
+            updatePotDisplay();
+            document.getElementById('community-cards').innerHTML = '';
+            document.getElementById('player-hand').innerHTML = '';
+            document.getElementById('opponent-hand').innerHTML = '';
+            
+            // Hide round buttons and show action buttons
+            roundButtonsContainer.style.display = 'none';
+            document.querySelector('.action-buttons').style.display = 'flex';
+            document.querySelector('.bet-controls').style.display = 'flex';
+            
+            // Start a new game
+            initializeGame();
+        };
+    } else {
+        console.error('New Game button not found!');
     }
     
     console.log('Button event listeners initialized');
@@ -1683,10 +1722,10 @@ function endRound(winner) {
     updateChipsDisplay();
     updatePotDisplay();
     
-    // Show the Next Round button
-    const nextRoundBtn = document.getElementById('next-round-btn');
-    if (nextRoundBtn) {
-        nextRoundBtn.style.display = 'block';
+    // Show the round buttons container
+    const roundButtonsContainer = document.querySelector('.round-buttons');
+    if (roundButtonsContainer) {
+        roundButtonsContainer.style.display = 'flex'; // or 'block' depending on your layout
     }
     
     // Disable all action buttons
@@ -1891,10 +1930,19 @@ function startNewRound() {
     // Hide result modal if it's still showing
     document.getElementById('result-modal').classList.remove('show');
     
-    // Hide the Next Round button
-    const nextRoundBtn = document.getElementById('next-round-btn');
-    if (nextRoundBtn) {
-        nextRoundBtn.style.display = 'none';
+    // Hide the round buttons container and show action buttons
+    const roundButtonsContainer = document.querySelector('.round-buttons');
+    const actionButtons = document.querySelector('.action-buttons');
+    const betControls = document.querySelector('.bet-controls');
+    
+    if (roundButtonsContainer) {
+        roundButtonsContainer.style.display = 'none';
+    }
+    if (actionButtons) {
+        actionButtons.style.display = 'flex';
+    }
+    if (betControls) {
+        betControls.style.display = 'flex';
     }
     
     // Check for game over conditions
