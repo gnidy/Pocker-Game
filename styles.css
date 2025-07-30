@@ -231,6 +231,38 @@ body {
     transform: translateY(-2px);
 }
 
+/* All In button */
+.btn-warning {
+    background-color: #f39c12;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-size: 0.9rem;
+}
+
+.btn-warning:hover:not(:disabled) {
+    background-color: #e67e22;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.btn-warning:active:not(:disabled) {
+    transform: translateY(1px);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.btn-warning:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
 .btn-secondary {
     background-color: #7f8c8d;
     color: white;
@@ -340,6 +372,23 @@ body {
     border-left: 3px solid #f1c40f;
 }
 
+/* Close button for modals */
+.close-modal {
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    font-size: 28px;
+    font-weight: bold;
+    color: #999;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.close-modal:hover {
+    color: #333;
+    text-decoration: none;
+}
+
 /* Modal Styles */
 .modal {
     display: none;
@@ -386,97 +435,96 @@ body {
 
 .modal.show .modal-content {
     transform: translateY(0);
-    animation: slideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 @keyframes slideUp {
-    from { transform: translateY(40px); opacity: 0; }
-    to { transform: translateY(0); opacity: 1; }
+from { transform: translateY(40px); opacity: 0; }
+to { transform: translateY(0); opacity: 1; }
 }
 
 .modal-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1.8rem;
-    padding-bottom: 1.2rem;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    position: relative;
+display: flex;
+justify-content: space-between;
+align-items: center;
+margin-bottom: 1.8rem;
+padding-bottom: 1.2rem;
+border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+position: relative;
 }
 
 .modal-header h2 {
-    margin: 0;
-    color: #ffffff;
-    font-size: 2rem;
-    font-weight: 700;
-    letter-spacing: 0.5px;
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+margin: 0;
+color: #ffffff;
+font-size: 2rem;
+font-weight: 700;
+letter-spacing: 0.5px;
+text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .modal-body {
-    margin-bottom: 2.2rem;
-    color: #e0e0e0;
-    line-height: 1.7;
-    font-size: 1.1rem;
+margin-bottom: 2.2rem;
+color: #e0e0e0;
+line-height: 1.7;
+font-size: 1.1rem;
 }
 
 .modal-buttons {
-    display: flex;
-    justify-content: flex-end;
-    gap: 1.2rem;
-    margin-top: 2rem;
+display: flex;
+justify-content: flex-end;
+gap: 1.2rem;
+margin-top: 2rem;
 }
 
 .close-modal {
-    background: rgba(255, 255, 255, 0.1);
-    border: none;
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    color: #b0b0b0;
-    font-size: 1.5rem;
-    line-height: 1;
-    transition: all 0.2s ease;
-    padding: 0;
-    position: relative;
-    overflow: hidden;
+background: rgba(255, 255, 255, 0.1);
+border: none;
+width: 36px;
+height: 36px;
+border-radius: 50%;
+display: flex;
+align-items: center;
+justify-content: center;
+cursor: pointer;
+color: #b0b0b0;
+font-size: 1.5rem;
+line-height: 1;
+transition: all 0.2s ease;
+padding: 0;
+position: relative;
+overflow: hidden;
 }
 
 .close-modal::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 50%;
-    transform: scale(0);
-    transition: transform 0.3s ease;
+content: '';
+position: absolute;
+top: 0;
+left: 0;
+right: 0;
+bottom: 0;
+background: rgba(255, 255, 255, 0.1);
+border-radius: 50%;
+transform: scale(0);
+transition: transform 0.3s ease;
 }
 
 .close-modal:hover {
-    color: #ffffff;
-    background: rgba(255, 255, 255, 0.15);
+color: #ffffff;
+background: rgba(255, 255, 255, 0.15);
 }
 
 .close-modal:hover::before {
-    transform: scale(1.5);
-    opacity: 0;
+transform: scale(1.5);
+opacity: 0;
 }
 
 /* Card display in modals */
 #result-cards {
-    display: flex;
-    justify-content: center;
-    flex-wrap: wrap;
-    gap: 15px;
-    margin: 2rem 0 2.5rem;
-    perspective: 1000px;
+display: flex;
+justify-content: center;
+flex-wrap: wrap;
+gap: 15px;
+margin: 2rem 0 2.5rem;
+perspective: 1000px;
 }
 
 #result-cards .card {
@@ -920,6 +968,25 @@ body {
     color: #e74c3c !important;
 }
 
+.winning-card {
+    box-shadow: 0 0 15px #FFD700, 0 0 20px #FFD700, 0 0 25px #FFD700 !important;
+    transform: translateY(-10px) scale(1.1) !important;
+    z-index: 20;
+    border: 2px solid #FFD700 !important;
+    animation: pulse 1.5s infinite alternate;
+}
+
+@keyframes pulse {
+    0% {
+        box-shadow: 0 0 5px #FFD700, 0 0 10px #FFD700, 0 0 15px #FFD700;
+        transform: translateY(-5px) scale(1.05);
+    }
+    100% {
+        box-shadow: 0 0 20px #FFD700, 0 0 30px #FFD700, 0 0 40px #FFD700;
+        transform: translateY(-10px) scale(1.1);
+    }
+}
+
 /* Style for black cards (clubs and spades) */
 .card[data-suit='♣'] .card-suit,
 .card[data-suit='♠'] .card-suit,
@@ -1128,4 +1195,95 @@ body {
     position: absolute;
     top: 2px;
     left: 10px;
+}
+
+/* Game Over Modal Specific Styles */
+#game-over-modal .modal-content {
+    background: linear-gradient(145deg, #1a1e2c, #2a2d3e);
+    padding: 2.5rem;
+    border-radius: 16px;
+    max-width: 500px;
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    position: relative;
+    overflow: hidden;
+}
+
+#game-over-modal h2 {
+    color: #fff;
+    font-size: 2.2rem;
+    margin-bottom: 1.5rem;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+#game-over-modal p {
+    color: #e0e0e0;
+    font-size: 1.2rem;
+    line-height: 1.6;
+    margin-bottom: 2rem;
+}
+
+#game-over-modal .modal-buttons {
+    justify-content: center;
+    margin-top: 1.5rem;
+}
+
+#game-over-modal .btn-primary {
+    background: linear-gradient(135deg, #3498db, #2980b9);
+    border: none;
+    padding: 12px 30px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    border-radius: 50px;
+    box-shadow: 0 4px 15px rgba(41, 128, 185, 0.3);
+    transition: all 0.3s ease;
+}
+
+#game-over-modal .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(41, 128, 185, 0.4);
+    background: linear-gradient(135deg, #3aa1e6, #2d8ed6);
+}
+
+#game-over-modal .close-modal {
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    font-size: 28px;
+    color: #b0b0b0;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+}
+
+#game-over-modal .close-modal:hover {
+    color: #fff;
+    background: rgba(255, 255, 255, 0.1);
+    transform: rotate(90deg);
+}
+
+/* Add a subtle animation when the modal appears */
+@keyframes modalAppear {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+#game-over-modal.show .modal-content {
+    animation: modalAppear 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }

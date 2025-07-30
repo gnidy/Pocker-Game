@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Poker Game</title>
-    <link id="favicon" rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text x='50' y='60' font-size='90' fill='%232c3e50' font-family='Arial'>♠</text></svg>">
+    <link id="favicon" rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text x='50' y='60' font-size='115' fill='%232c3e50' font-family='Arial'>♠</text></svg>">
     <link rel="stylesheet" href="styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
@@ -57,6 +57,7 @@
                         </div>
                         <div class="bet-actions">
                             <button id="bet-btn" class="btn btn-success">Bet</button>
+                            <button id="allin-btn" class="btn btn-warning">All In</button>
                         </div>
                     </div>
                 </div>
@@ -97,6 +98,7 @@
 
     <div class="modal" id="game-over-modal">
         <div class="modal-content">
+            <span class="close-modal" id="close-game-over">&times;</span>
             <h2>Game Over!</h2>
             <p>You've run out of chips. Better luck next time!</p>
             <div class="modal-buttons">

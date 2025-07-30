@@ -229,7 +229,8 @@ function setupButtonListeners() {
         'check-btn': handleCheck,
         'call-btn': handleCall,
         'fold-btn': handleFold,
-        'bet-btn': handleBet
+        'bet-btn': handleBet,
+        'allin-btn': handleAllIn
     };
 
     // Set up event listeners for all action buttons
@@ -379,17 +380,36 @@ function computerTurn() {
         const handStrength = evaluateComputerHandStrength(callAmount);
         const randomFactor = Math.random();
         let actionTaken = false;
-        
+            
         // 1. Check if computer needs to call
         if (callAmount > 0) {
-            // If computer doesn't have enough chips to call, go all-in or fold
+            // If computer doesn't have enough chips to call, go all-in with remaining chips
             if (callAmount >= gameState.computerChips) {
-                const allInAmount = gameState.computerChips;
+                const allInAmount = Math.min(callAmount, gameState.computerChips);
                 gameState.computerChips = 0;
                 gameState.pot += allInAmount;
                 gameState.currentRoundBets.computer += allInAmount;
+                gameState.currentBet = Math.max(gameState.currentBet, gameState.currentRoundBets.computer);
                 addToLog(`Computer goes all-in with $${allInAmount}!`, 'computer');
                 actionTaken = true;
+                
+                // Update UI
+                updateChipsDisplay();
+                updatePotDisplay();
+                
+                // If both players are all-in, go straight to showdown
+                if (gameState.playerChips <= 0) {
+                    addToLog("Both players are all-in! Dealing remaining community cards...", 'system');
+                    // Deal remaining community cards and go to showdown
+                    while (gameState.communityCards.length < 5) {
+                        if (gameState.communityCards.length === 0) dealFlop();
+                        else if (gameState.communityCards.length === 3) dealTurn();
+                        else if (gameState.communityCards.length === 4) dealRiver();
+                    }
+                    // End the round to determine the winner
+                    endRound();
+                    return;
+                }
                 
                 // If computer is all-in, end the betting round
                 if (gameState.computerChips === 0) {
@@ -407,13 +427,36 @@ function computerTurn() {
                 endRound('player');
             }
         }
-        
+            
         // 2. If no action taken yet, decide on next move
         if (!actionTaken) {
+            // Ensure computer has enough chips to make any move
+            if (gameState.computerChips <= 0) {
+                // If no chips left, just check or call
+                if (callAmount > 0) {
+                    // If need to call but no chips, go all-in with 0
+                    gameState.computerChips = 0;
+                    gameState.pot += callAmount;
+                    gameState.currentRoundBets.computer += callAmount;
+                    addToLog(`Computer has no chips left and calls $${callAmount}`, 'computer');
+                } else {
+                    // Check
+                    addToLog('Computer checks.', 'computer');
+                }
+                actionTaken = true;
+                gameState.currentPlayer = 'player';
+                updateUIForPlayerTurn();
+                return;
+            }
+                
             // Calculate raise amount (if deciding to raise)
             const minRaise = Math.max(gameState.minRaise, callAmount * 2);
-            const maxRaise = Math.min(gameState.computerChips, gameState.computerChips * 0.5); // Don't bet more than 50% of chips
-            
+            // Ensure we don't try to raise more than computer's remaining chips
+            const maxRaise = Math.min(
+                gameState.computerChips - callAmount, // Don't exceed remaining chips after call
+                Math.max(gameState.computerChips * 0.5, minRaise) // Don't bet more than 50% of chips unless it's a min raise
+            );
+                
             // More sophisticated decision making with bluffing
             const potOdds = callAmount / (gameState.pot + callAmount);
             const isPreFlop = gameState.communityCards.length === 0;
@@ -822,7 +865,6 @@ function displayComputerHand(showCards = false) {
         });
         // Add a label
         const label = document.createElement('div');
-        label.textContent = "Computer's Cards:";
         label.style.width = '100%';
         label.style.textAlign = 'center';
         label.style.marginBottom = '5px';
@@ -940,7 +982,7 @@ function handleFold() {
 
 // Disable all player action buttons
 function disablePlayerActions() {
-    const buttons = ['fold-btn', 'check-btn', 'call-btn', 'bet-btn'];
+    const buttons = ['fold-btn', 'check-btn', 'call-btn', 'bet-btn', 'allin-btn'];
     buttons.forEach(btnId => {
         const btn = document.getElementById(btnId);
         if (btn) btn.disabled = true;
@@ -1035,6 +1077,72 @@ function handleBet() {
     }
 }
 
+// Handle All In action
+function handleAllIn() {
+    console.log('All In button clicked');
+    
+    if (gameState.currentPlayer !== 'player') {
+        console.log('Not your turn to go all in');
+        return;
+    }
+    
+    // Check if player has chips to go all in
+    if (gameState.playerChips <= 0) {
+        addToLog("You don't have any chips to go all in!", 'system');
+        return;
+    }
+    
+    // Calculate total bet amount (all remaining chips)
+    const allInAmount = gameState.playerChips;
+    const callAmount = gameState.currentBet - gameState.currentRoundBets.player;
+    const isRaise = (allInAmount > callAmount);
+    
+    // Update game state
+    gameState.playerChips = 0; // Player goes all in, chips go to 0
+    gameState.pot += allInAmount;
+    
+    // Update bet tracking
+    if (isRaise) {
+        const raiseAmount = allInAmount - callAmount;
+        gameState.currentBet = gameState.currentRoundBets.player + allInAmount;
+        gameState.lastRaiseAmount = raiseAmount;
+        addToLog(`You go all in with $${allInAmount} (raise of $${raiseAmount})!`, 'player');
+    } else {
+        // Just calling with all chips
+        addToLog(`You go all in with $${allInAmount}!`, 'player');
+    }
+    
+    gameState.currentRoundBets.player = gameState.currentBet;
+    gameState.lastAggressor = 'player';
+    
+    // Update UI
+    updateChipsDisplay();
+    updatePotDisplay();
+    
+    // Disable buttons until computer makes a move
+    disablePlayerActions();
+    
+    // If both players are all-in, go straight to showdown
+    if (gameState.computerChips <= 0) {
+        addToLog("Both players are all-in! Dealing remaining community cards...", 'system');
+        // Deal remaining community cards and go to showdown
+        while (gameState.communityCards.length < 5) {
+            if (gameState.communityCards.length === 0) dealFlop();
+            else if (gameState.communityCards.length === 3) dealTurn();
+            else if (gameState.communityCards.length === 4) dealRiver();
+        }
+        // End the round to determine the winner
+        endRound();
+        return;
+    }
+    
+    // Computer's turn
+    gameState.currentPlayer = 'computer';
+    
+    // Small delay for better UX before computer's turn
+    setTimeout(computerTurn, 1000);
+}
+
 // Update the UI for the player's turn
 function updateUIForPlayerTurn() {
     console.log('Updating UI for player turn');
@@ -1044,10 +1152,11 @@ function updateUIForPlayerTurn() {
         const callBtn = document.getElementById('call-btn');
         const betBtn = document.getElementById('bet-btn');
         const foldBtn = document.getElementById('fold-btn');
+        const allInBtn = document.getElementById('allin-btn');
         const betSlider = document.getElementById('bet-slider');
         const betAmount = document.getElementById('bet-amount');
         
-        if (!checkBtn || !callBtn || !betBtn || !foldBtn || !betSlider || !betAmount) {
+        if (!checkBtn || !callBtn || !betBtn || !foldBtn || !allInBtn || !betSlider || !betAmount) {
             console.error('One or more UI elements not found!');
             return;
         }
@@ -1125,8 +1234,17 @@ function updateUIForPlayerTurn() {
         betSlider.value = Math.min(Math.max(minRaise, betSlider.min), betSlider.max);
         betAmount.textContent = betSlider.value;
         
+        // Update All In button state
+        if (gameState.currentPlayer === 'player' && gameState.playerChips > 0) {
+            allInBtn.disabled = false;
+            allInBtn.style.display = 'inline-block';
+        } else {
+            allInBtn.disabled = true;
+            allInBtn.style.display = 'none';
+        }
+        
         // Ensure all buttons are visible
-        [checkBtn, callBtn, betBtn, foldBtn].forEach(btn => {
+        [checkBtn, callBtn, betBtn, foldBtn, allInBtn].forEach(btn => {
             if (btn) btn.style.display = 'inline-block';
         });
         
@@ -1373,31 +1491,57 @@ function evaluateHandStrength(cards) {
     return 1;
 }
 
-// Highlight the winning cards with a green glow and elevation
+// Highlight the best three-card combination for the winner
 function highlightWinningCards(winner) {
     // Remove any existing winner classes first
     document.querySelectorAll('.card').forEach(card => {
-        card.classList.remove('winner');
+        card.classList.remove('winner', 'winning-card');
     });
     
-    if (winner === 'player') {
+    if (winner === 'player' || winner === 'tie') {
         // Highlight player's cards
         const playerCards = document.querySelectorAll('#player-hand .card');
         playerCards.forEach(card => {
             card.classList.add('winner');
         });
-    } else if (winner === 'computer') {
+    }
+    
+    if (winner === 'computer' || winner === 'tie') {
         // Highlight computer's cards
         const computerCards = document.querySelectorAll('#opponent-hand .card');
         computerCards.forEach(card => {
             card.classList.add('winner');
         });
-    } else if (winner === 'tie') {
-        // Highlight both hands in case of tie
-        const allCards = document.querySelectorAll('.card');
-        allCards.forEach(card => {
-            card.classList.add('winner');
-        });
+    }
+    
+    // Find and highlight the best three-card combination
+    if (gameState.communityCards && gameState.communityCards.length > 0) {
+        // Get all community cards
+        const communityCards = [...gameState.communityCards];
+        const communityCardElements = document.querySelectorAll('#community-cards .card');
+        
+        // If we have at least 3 community cards, highlight the best 3
+        if (communityCards.length >= 3) {
+            // Sort community cards by rank (highest first)
+            const sortedCommunity = [...communityCards].sort((a, b) => {
+                return RANK_ORDER.indexOf(b.rank) - RANK_ORDER.indexOf(a.rank);
+            });
+            
+            // Take top 3 highest cards
+            const bestThree = sortedCommunity.slice(0, 3);
+            
+            // Highlight these cards in the UI
+            communityCardElements.forEach((cardElement, index) => {
+                const card = communityCards[index];
+                const isTopThree = bestThree.some(bestCard => 
+                    bestCard.rank === card.rank && bestCard.suit === card.suit
+                );
+                
+                if (isTopThree) {
+                    cardElement.classList.add('winning-card');
+                }
+            });
+        }
     }
 }
 
@@ -1442,45 +1586,66 @@ function highlightBestHand() {
     });
 }
 
+// Get human-readable description of a hand strength
+function getHandDescription(handStrength) {
+    const descriptions = {
+        1: 'High Card',
+        2: 'One Pair',
+        3: 'Two Pair',
+        4: 'Three of a Kind',
+        5: 'Straight',
+        6: 'Flush',
+        7: 'Full House',
+        8: 'Four of a Kind',
+        9: 'Straight Flush',
+        10: 'Royal Flush'
+    };
+    return descriptions[handStrength] || 'Unknown Hand';
+}
+
 // End the current round and determine the winner
 function endRound(winner) {
-    console.log('Ending round. Winner:', winner);
+    console.log('endRound called with winner:', winner);
     
-    // Show the computer's cards before determining the winner
+    // Show computer's cards at showdown
     displayComputerHand(true);
     
-    // If no winner is specified (showdown), determine the winner
+    // If winner is not specified, determine it
     if (!winner) {
-        const playerHandStrength = evaluateHandStrength([...gameState.playerHand, ...gameState.communityCards]);
-        const computerHandStrength = evaluateHandStrength([...gameState.computerHand, ...gameState.communityCards]);
-        
-        if (playerHandStrength > computerHandStrength) {
-            winner = 'player';
-            addToLog(`Your hand was stronger!`, 'player');
-            highlightWinningCards('player');
-        } else if (computerHandStrength > playerHandStrength) {
+        // If someone folded, the other player wins
+        if (gameState.playerFolded) {
             winner = 'computer';
-            addToLog(`Computer's hand was stronger!`, 'computer');
-            highlightWinningCards('computer');
+            addToLog('You folded. Computer wins!', 'computer');
+        } else if (gameState.computerFolded) {
+            winner = 'player';
+            addToLog('Computer folded. You win!', 'player');
         } else {
-            winner = 'tie';
-            addToLog(`It's a tie!`, 'system');
-            highlightWinningCards('tie');
+            // Showdown - compare hands
+            const playerHandStrength = evaluateHandStrength([...gameState.playerHand, ...gameState.communityCards]);
+            const computerHandStrength = evaluateHandStrength([...gameState.computerHand, ...gameState.communityCards]);
+            
+            // Add hand info to log
+            const playerHandDesc = getHandDescription(playerHandStrength);
+            const computerHandDesc = getHandDescription(computerHandStrength);
+            
+            addToLog(`Your hand: ${playerHandDesc}`, 'player');
+            addToLog(`Computer's hand: ${computerHandDesc}`, 'computer');
+            
+            if (playerHandStrength > computerHandStrength) {
+                winner = 'player';
+                addToLog(`You win with ${playerHandDesc}!`, 'player');
+            } else if (computerHandStrength > playerHandStrength) {
+                winner = 'computer';
+                addToLog(`Computer wins with ${computerHandDesc}!`, 'computer');
+            } else {
+                // It's a tie
+                addToLog(`It's a tie! Both have ${playerHandDesc}`, 'system');
+            }
         }
-        
-        // Highlight the best 5-card hand
-        highlightBestHand();
-        
-        // Log the hands for debugging
-        console.log('Player hand strength:', playerHandStrength);
-        console.log('Computer hand strength:', computerHandStrength);
-    } else if (winner === 'player') {
-        // If player won by fold, still highlight player's cards
-        highlightWinningCards('player');
-    } else if (winner === 'computer') {
-        // If computer won by fold, highlight computer's cards
-        highlightWinningCards('computer');
     }
+    
+    // Highlight the winning cards
+    highlightWinningCards(winner);
     
     // Create a message showing the computer's cards
     const computerCards = gameState.computerHand.map(card => 
@@ -1652,6 +1817,17 @@ setInterval(updateFavicon, 1500);
 
 // Initial favicon update
 updateFavicon();
+
+// Add event listener for close button in game over modal
+const closeGameOverBtn = document.getElementById('close-game-over');
+if (closeGameOverBtn) {
+    closeGameOverBtn.addEventListener('click', function() {
+        const gameOverModal = document.getElementById('game-over-modal');
+        if (gameOverModal) {
+            gameOverModal.classList.remove('show');
+        }
+    });
+}
 
 // Add event listener for New Game button in game over modal
 const newGameBtn = document.getElementById('new-game');
