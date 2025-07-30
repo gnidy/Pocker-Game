@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Poker Game</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <div class="game-container">
+
+        <div class="opponent-area">
+            <div class="player-info opponent-info">
+                <div class="player-data">
+                    <div class="player-name">Opponent</div>
+                    <div class="player-chips">Chips: $<span id="opponent-chips">1000</span></div>
+                </div>
+                <div class="player-hand" id="opponent-hand"></div>
+                <div class="player-status" id="opponent-status"></div>
+            </div>
+        </div>
+
+        <div class="table">
+            <div class="pot"><span id="pot">0</span></div>
+            <div class="community-cards" id="community-cards">
+                <!-- Community cards will be added here -->
+            </div>
+        </div>
+
+        <div class="player-area">
+            <div class="player-info">
+                <div class="player-name">You</div>
+                <div class="player-chips">Chips: $<span id="player-chips">1000</span></div>
+                <div class="player-hand" id="player-hand"></div>
+                <div class="player-actions">
+                    <!-- Next Round Button (initially hidden) -->
+                    <button id="next-round-btn" class="btn btn-warning" style="display: none;">Next Round</button>
+                    
+                    <!-- Main Action Buttons -->
+                    <div class="action-buttons">
+                        <button id="fold-btn" class="btn btn-danger">Fold</button>
+                        <button id="check-btn" class="btn btn-secondary">Check</button>
+                        <button id="call-btn" class="btn btn-primary">Call $<span id="call-amount">0</span></button>
+                    </div>
+                    
+                    <!-- Bet Controls -->
+                    <div class="bet-controls">
+                        <div class="bet-slider-container">
+                            <input type="range" id="bet-slider" min="0" max="1000" value="10" class="slider">
+                            <div class="bet-amount-display">
+                                <span>Bet Amount:</span>
+                                <span>$<span id="bet-amount">10</span></span>
+                            </div>
+                        </div>
+                        <div class="bet-actions">
+                            <button id="bet-btn" class="btn btn-success">Bet</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="game-log" id="game-log">
+            <div class="log-header">Game Log</div>
+            <div class="log-content" id="log-content"></div>
+        </div>
+    </div>
+
+    <div class="modal" id="start-modal">
+        <div class="modal-content">
+            <h2>Welcome to Poker!</h2>
+            <p>Start a new game with default settings?</p>
+            <div class="modal-buttons">
+                <button id="start-game" class="btn btn-primary">Start Game</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="result-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="result-title">Round Over</h2>
+                <span class="close-modal" id="close-result-modal">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div id="result-cards"></div>
+                <p id="result-message"></p>
+            </div>
+            <div class="modal-buttons">
+                <button id="next-round" class="btn btn-primary">Next Round</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="game-over-modal">
+        <div class="modal-content">
+            <h2>Game Over!</h2>
+            <p>You've run out of chips. Better luck next time!</p>
+            <div class="modal-buttons">
+                <button id="new-game" class="btn btn-primary">New Game</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="poker.js"></script>
+</body>
+</html>
