@@ -1694,28 +1694,43 @@ function endRound(winner) {
     const resultMessage = `Computer's cards: ${computerCards}\n\n`;
     
     // Log the winner and amount won
-    const winAmount = gameState.pot;
+    const winAmount = Math.max(0, gameState.pot); // Ensure non-negative pot
     
     // Award the pot to the winner
     if (winner === 'player') {
-        const winAmount = gameState.pot;
         gameState.playerChips += winAmount;
         addToLog(`You win $${winAmount}!`, 'player');
         showResult('You Win!', resultMessage + `You won $${winAmount} with a better hand!`);
     } else if (winner === 'computer') {
-        const winAmount = gameState.pot;
-        gameState.computerChips += winAmount;
-        addToLog(`Computer wins $${winAmount}.`, 'computer');
-        showResult('Computer Wins', resultMessage + `Computer wins $${winAmount}. Better luck next time!`);
+        // Ensure computer doesn't go into negative chips
+        const actualWinAmount = Math.min(winAmount, gameState.playerChips);
+        gameState.computerChips += actualWinAmount;
+        gameState.playerChips = Math.max(0, gameState.playerChips - actualWinAmount);
+        addToLog(`Computer wins $${actualWinAmount}.`, 'computer');
+        showResult('Computer Wins', resultMessage + `Computer wins $${actualWinAmount}. Better luck next time!`);
     } else {
         // Tie - split the pot
-        const halfPot = Math.floor(gameState.pot / 2);
+        const halfPot = Math.floor(winAmount / 2);
         const playerWin = halfPot;
-        const computerWin = gameState.pot - halfPot;
-        gameState.playerChips += playerWin;
-        gameState.computerChips += computerWin;
-        addToLog(`It's a tie! Pot of $${gameState.pot} is split. You get $${playerWin}, computer gets $${computerWin}.`, 'system');
-        showResult('Tie Game', resultMessage + `Pot of $${gameState.pot} is split. You get $${playerWin}, computer gets $${computerWin}.`);
+        const computerWin = winAmount - halfPot;
+        
+        // Ensure neither player goes into negative chips
+        const maxPlayerWin = Math.min(playerWin, gameState.computerChips);
+        const maxComputerWin = Math.min(computerWin, gameState.playerChips);
+        
+        gameState.playerChips += maxPlayerWin;
+        gameState.computerChips += maxComputerWin;
+        
+        // Adjust the other player's chips if needed
+        if (playerWin > maxPlayerWin) {
+            gameState.computerChips = 0; // Computer can't cover their share
+        }
+        if (computerWin > maxComputerWin) {
+            gameState.playerChips = 0; // Player can't cover their share
+        }
+        
+        addToLog(`It's a tie! Pot of $${winAmount} is split. You get $${maxPlayerWin}, computer gets $${maxComputerWin}.`, 'system');
+        showResult('Tie Game', resultMessage + `Pot of $${winAmount} is split. You get $${maxPlayerWin}, computer gets $${maxComputerWin}.`);
     }
     
     // Update UI

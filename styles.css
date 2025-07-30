@@ -763,6 +763,10 @@ perspective: 1000px;
     backdrop-filter: blur(5px);
 }
 
+.round-buttons {
+    justify-content: center;
+}
+
 /* Action Buttons */
 .action-buttons {
     display: flex;
