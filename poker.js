@@ -1627,6 +1627,32 @@ function showResult(title, message) {
     };
 }
 
+// Favicon cycling functionality
+const favicon = document.getElementById('favicon');
+const suits = [
+    { char: '♥', color: 'e74c3c' },  // heart
+    { char: '♠', color: '2c3e50' },  // spade
+    { char: '♦', color: 'e74c3c' },  // diamond
+    { char: '♣', color: '2c3e50' }   // club
+];
+let currentSuit = 0;
+
+function updateFavicon() {
+    const suit = suits[currentSuit];
+    const svg = `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'>
+        <text x='50' y='60' font-size='115' fill='#${suit.color}' font-family='Arial' text-anchor='middle' dominant-baseline='middle'>${suit.char}</text>
+    </svg>`;
+    favicon.href = `data:image/svg+xml,${encodeURIComponent(svg)}`;
+    
+    currentSuit = (currentSuit + 1) % suits.length;
+}
+
+// Change favicon every 1.5 seconds
+setInterval(updateFavicon, 1500);
+
+// Initial favicon update
+updateFavicon();
+
 // Add event listener for New Game button in game over modal
 const newGameBtn = document.getElementById('new-game');
 if (newGameBtn) {
